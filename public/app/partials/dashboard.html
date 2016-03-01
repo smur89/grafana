@@ -11,7 +11,11 @@
 
 		<div class="clearfix"></div>
 
-		<div class="grafana-row" ng-controller="RowCtrl" ng-repeat="(row_name, row) in dashboard.rows" row-height>
+    <dashboard-query dashboard="dashboard"></dashboard-query>
+
+    <div class="clearfix"></div>
+
+    <div class="grafana-row" ng-controller="RowCtrl" ng-repeat="(row_name, row) in dashboard.rows" row-height>
 			<div class="row-control">
 				<div class="row-control-inner">
 					<div class="row-close" ng-show="row.collapse" data-placement="bottom" >

@@ -2,6 +2,7 @@ define([
   './dashboardCtrl',
   './dashboardLoaderSrv',
   './dashnav/dashnav',
+  './query/metrics_dashboard_ctrl',
   './submenu/submenu',
   './saveDashboardAsCtrl',
   './rowCtrl',

@@ -188,6 +188,23 @@ function pluginDirectiveLoader($compile, datasourceSrv, $rootScope, $q, $http, $
       case 'panel': {
         return loadPanelComponentInfo(scope, attrs);
       }
+      // Dashboard Query
+      case "dashboard-query-ctrl": {
+        let datasource = scope.ctrl.datasource || scope.ctrl.dashboard.datasource;
+        return datasourceSrv.get(datasource).then(ds => {
+          scope.datasource = ds;
+
+          return System.import(ds.meta.module).then(dsModule => {
+            return {
+              baseUrl: ds.meta.baseUrl,
+              name: 'dashboard-query-ctrl-' + ds.meta.id,
+              bindings: {target: "=", dashboardCtrl: "=", datasource: "="},
+              attrs: {"target": "target", "dashboard-ctrl": "ctrl", datasource: "datasource"},
+              Component: dsModule.DashboardCtrl
+            };
+          });
+        });
+      }
       default: {
         return $q.reject({message: "Could not find component type: " + attrs.type });
       }

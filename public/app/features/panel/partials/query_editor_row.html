@@ -6,7 +6,7 @@
 			</a>
 		</li>
 		<li class="tight-form-item small" ng-show="ctrl.target.datasource">
-			<em>{{ctrl.target.datasource}}</em>
+			<em>{{ctrl.target.datasource || ctrl.datasource}}</em>
 		</li>
 		<li class="tight-form-item" ng-if="ctrl.toggleEditorMode">
 			<a class="pointer" tabindex="1" ng-click="ctrl.toggleEditorMode()">

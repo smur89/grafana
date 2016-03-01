@@ -41,6 +41,7 @@ function (angular, $, _, moment) {
       this.links = data.links || [];
       this._updateSchema(data);
       this._initMeta(meta);
+      this.targets = data.targets || null;
     }
 
     var p = DashboardModel.prototype;

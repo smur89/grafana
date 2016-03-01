@@ -1,6 +1,7 @@
 import {ElasticDatasource} from './datasource';
 import {ElasticQueryCtrl} from './query_ctrl';
 import {ElasticConfigCtrl} from './config_ctrl';
+import {ElasticDashboardCtrl} from './dashboard_ctrl';
 
 class ElasticQueryOptionsCtrl {
   static templateUrl = 'partials/query.options.html';
@@ -16,4 +17,5 @@ export {
   ElasticConfigCtrl as ConfigCtrl,
   ElasticQueryOptionsCtrl as QueryOptionsCtrl,
   ElasticAnnotationsQueryCtrl as AnnotationsQueryCtrl,
+  ElasticDashboardCtrl as DashboardCtrl,
 };

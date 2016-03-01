@@ -3,7 +3,19 @@
 		Query
 	</li>
 	<li>
-		<input type="text" class="tight-form-input" style="width: 345px;" ng-model="ctrl.target.query" spellcheck='false' placeholder="Lucene query" ng-blur="ctrl.refresh()">
+    <div class="pull-right dropdown" style="margin-right: 10px;">
+      <button class="btn btn-inverse dropdown-toggle" data-toggle="dropdown" bs-tooltip="'Query'">
+        <i class="fa fa-database"></i>&nbsp;
+        {{ctrl.target.query}} &nbsp; <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu" role="menu">
+        <li ng-repeat="target in ctrl.panelCtrl.dashboard.targets" role="menuitem">
+          <a ng-click="ctrl.setDataQuery(target.query);">{{target.query}}</a>
+        </li>
+      </ul>
+    </div>
+		<!--<input type="text" class="tight-form-input" style="width: 345px;" ng-model="ctrl.target.query" spellcheck='false' placeholder="Lucene query" ng-blur="ctrl.refresh()">-->
 	</li>
 	<li class="tight-form-item query-keyword">
 		Alias
