@@ -25,7 +25,6 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
   timeInfo: any;
   skipDataOnInit: boolean;
   datasources: any[];
-  parsedTargets: any[];
 
   constructor($scope, $injector) {
     super($scope, $injector);
@@ -35,7 +34,7 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
     this.$q = $injector.get('$q');
     this.datasourceSrv = $injector.get('datasourceSrv');
     this.timeSrv = $injector.get('timeSrv');
-    this.parsedTargets = this.parseTargets();
+    this.parseTargets(this.panel.targets);
 
     if (!this.panel.targets) {
       this.panel.targets = [{}];
@@ -76,6 +75,7 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
     delete this.error;
     this.loading = true;
 
+    this.parseTargets(this.panel.targets);
     // load datasource service
     this.datasourceSrv.get(this.panel.datasource).then(datasource => {
       this.datasource = datasource;
@@ -218,21 +218,28 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
     this.panel.targets.push(target);
   }
 
-   parseTargets() {
-      var dashboardTargets = this.dashboard.targets;
-      if (dashboardTargets.length > 1) {
-        return dashboardTargets;
-      } else {
-        var parsedQueries = dashboardTargets[0].query.split("OR");
-        for (var query in parsedQueries){
-          if (query.contains("AND")){
-            var index = parsedQueries.indexOf(query);
-            parsedQueries.splice(index, 1);
-          }
-        }
-        return parsedQueries;
+   parseTargets(targets) {
+      var andFilters;
+      if (targets && targets.length === 1) {
+        var split = targets[0].query.split("AND");
+        var parsedQueries = split[0].split("OR");
+        andFilters = " AND " + split[1];
+        var splitTargets = this.splitQueries(targets[0], parsedQueries, andFilters);
       }
+      this.panel.andFilters = andFilters;
+   }
+
+   splitQueries(target, queries, andFilters){
+    for (var i in queries) {
+      var newTarget = {
+        datasource: target.datasource ? target.datasource : undefined,
+        query: queries[i] + andFilters,
+        metrics: target.metrics,
+        bucketAggs: target.aggs
+      };
+      this.panel.targets.push(newTarget);
     }
+   }
 
 }
 
