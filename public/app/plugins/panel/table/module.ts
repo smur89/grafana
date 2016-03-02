@@ -45,8 +45,8 @@ class TablePanelCtrl extends MultipleMetricsPanelCtrl {
   table: any;
 
   /** @ngInject */
-  constructor($scope, $injector, private annotationsSrv) {
-    super($scope, $injector);
+  constructor($scope, $injector, private annotationsSrv, templateSrv) {
+    super($scope, $injector, templateSrv);
     this.pageIndex = 0;
 
     if (this.panel.styles === void 0) {

@@ -25,8 +25,9 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
   timeInfo: any;
   skipDataOnInit: boolean;
   datasources: any[];
+  templateSrv: any;
 
-  constructor($scope, $injector) {
+  constructor($scope, $injector, templateSrv) {
     super($scope, $injector);
 
     // make metrics tab the default
@@ -34,6 +35,7 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
     this.$q = $injector.get('$q');
     this.datasourceSrv = $injector.get('datasourceSrv');
     this.timeSrv = $injector.get('timeSrv');
+    this.templateSrv = templateSrv;
     this.parseTargets(this.panel.targets);
 
     if (!this.panel.targets) {
@@ -218,43 +220,26 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
     this.panel.targets.push(target);
   }
 
-   // parseTargets(targets) {
-   //    var andFilters;
-   //    if (targets && targets.length === 1) {
-   //      // When you first make the panel, the object doesnt contain propterties
-   //      // it's later populated
-   //      if (targets[0].query) {
-   //        var split = targets[0].query.split("AND");
-   //        var parsedQueries = split[0].split("OR");
-   //        if (split[1]) {
-   //          andFilters = " AND " + split[1];
-   //        }
-   //        var splitTargets = this.splitQueries(targets[0], parsedQueries, andFilters);
-   //      }
-   //    }
-   //    this.panel.andFilters = andFilters;
-   // }
-
    parseTargets(targets) {
       var andFilters;
       if (targets && targets.length === 1) {
         // When you first make the panel, the object doesnt contain propterties
         // it's later populated
         if (targets[0].query) {
-          var orSplit = targets[0].query.substring(0, targets[0].query.indexOf("AND")).trim();
-          var andSplit = targets[0].query.substring(targets[0].query.indexOf(" AND ")+5).trim();
+          var queryInterpolated = this.templateSrv.replace(targets[0].query);
+          var orSplit = queryInterpolated.substring(0, queryInterpolated.indexOf(" AND ")).trim();
+          var andSplit = " " + queryInterpolated.substring(queryInterpolated.indexOf(" AND ")).trim();
           // Don't add a query if it's going to be the same as the first query
           if (orSplit.indexOf(" OR ") !== -1) {
             var parsedQueries = orSplit.split(" OR ");
             if (andSplit) {
-              andFilters = " AND " + andFilters;
+              andFilters = andSplit;
             }
             var splitTargets = this.splitQueries(targets[0], parsedQueries, andFilters);
           }
         }
       }
    }
-
 
    splitQueries(target, queries, andFilters){
     for (var i in queries) {
