@@ -114,7 +114,11 @@ export class TableRenderer {
       widthHack = '<div class="table-panel-width-hack">' + this.table.columns[columnIndex].text + '</div>';
     }
 
-    return '<td' + style + '>' + value + widthHack + '</td>';
+    if (value.indexOf("http") > -1) {
+      return '<td' + style + '><a href=\"' + value + '\" target=\"_blank\">' + value + widthHack + '</a></td>';
+    } else {
+      return '<td' + style + '>' + value + widthHack + '</td>';
+    }
   }
 
   render(page) {

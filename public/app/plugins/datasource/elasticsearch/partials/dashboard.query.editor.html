@@ -13,20 +13,20 @@
   </li>
 </query-editor-row>
 
-<div ng-repeat="agg in ctrl.target.metrics">
-  <elastic-metric-agg
-    target="ctrl.target" index="$index"
-    get-fields="ctrl.getFields($fieldType)"
-    on-change="ctrl.queryUpdated()"
-    es-version="ctrl.esVersion">
-  </elastic-metric-agg>
-</div>
+<!--<div ng-repeat="agg in ctrl.target.metrics">-->
+  <!--<elastic-metric-agg-->
+    <!--target="ctrl.target" index="$index"-->
+    <!--get-fields="ctrl.getFields($fieldType)"-->
+    <!--on-change="ctrl.queryUpdated()"-->
+    <!--es-version="ctrl.esVersion">-->
+  <!--</elastic-metric-agg>-->
+<!--</div>-->
 
-<div ng-repeat="agg in ctrl.target.bucketAggs">
-  <elastic-bucket-agg
-    target="ctrl.target" index="$index"
-    get-fields="ctrl.getFields($fieldType)"
-    on-change="ctrl.queryUpdated()">
-  </elastic-bucket-agg>
-</div>
+<!--<div ng-repeat="agg in ctrl.target.bucketAggs">-->
+  <!--<elastic-bucket-agg-->
+    <!--target="ctrl.target" index="$index"-->
+    <!--get-fields="ctrl.getFields($fieldType)"-->
+    <!--on-change="ctrl.queryUpdated()">-->
+  <!--</elastic-bucket-agg>-->
+<!--</div>-->
 

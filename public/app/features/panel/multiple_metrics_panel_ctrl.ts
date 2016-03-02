@@ -221,10 +221,16 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
    parseTargets(targets) {
       var andFilters;
       if (targets && targets.length === 1) {
-        var split = targets[0].query.split("AND");
-        var parsedQueries = split[0].split("OR");
-        andFilters = " AND " + split[1];
-        var splitTargets = this.splitQueries(targets[0], parsedQueries, andFilters);
+        // When you first make the panel, the object doesnt contain propterties
+        // it's later populated
+        if (targets[0].query) {
+          var split = targets[0].query.split("AND");
+          var parsedQueries = split[0].split("OR");
+          if (split[1]) {
+            andFilters = " AND " + split[1];
+          }
+          var splitTargets = this.splitQueries(targets[0], parsedQueries, andFilters);
+        }
       }
       this.panel.andFilters = andFilters;
    }
@@ -232,8 +238,9 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
    splitQueries(target, queries, andFilters){
     for (var i in queries) {
       var newTarget = {
+        alias: queries[i].split(":")[1],
         datasource: target.datasource ? target.datasource : undefined,
-        query: queries[i] + andFilters,
+        query: andFilters ? queries[i] + andFilters : queries[i],
         metrics: target.metrics,
         bucketAggs: target.aggs
       };
