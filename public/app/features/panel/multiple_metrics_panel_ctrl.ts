@@ -248,7 +248,7 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
         datasource: target.datasource ? target.datasource : undefined,
         query: andFilters ? queries[i] + andFilters : queries[i],
         metrics: target.metrics,
-        bucketAggs: target.aggs
+        bucketAggs: target.bucketAggs
       };
       this.panel.targets.push(newTarget);
     }
