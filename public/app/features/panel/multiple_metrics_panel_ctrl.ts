@@ -228,6 +228,10 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
         if (targets[0].query) {
           var queryInterpolated = this.templateSrv.replace(targets[0].query);
           var orSplit = queryInterpolated.substring(0, queryInterpolated.indexOf(" AND ")).trim();
+          // Remove brackets from OR statements
+          if (orSplit.indexOf("(") === 0 && orSplit.indexOf(")") === orSplit.length-1) {
+            orSplit = orSplit.substring(1, orSplit.length-1);
+          };
           var andSplit = " " + queryInterpolated.substring(queryInterpolated.indexOf(" AND ")).trim();
           // Don't add a query if it's going to be the same as the first query
           if (orSplit.indexOf(" OR ") !== -1) {
@@ -242,6 +246,7 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
    }
 
    splitQueries(target, queries, andFilters){
+   this.panel.targets = [];
     for (var i in queries) {
       var newTarget = {
         alias: queries[i].split(":")[1],
