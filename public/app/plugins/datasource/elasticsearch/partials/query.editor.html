@@ -23,6 +23,12 @@
 	<li>
 		<input type="text" class="tight-form-input" style="width: 200px;" ng-model="ctrl.target.alias" spellcheck='false' placeholder="alias patterns (empty = auto)" ng-blur="ctrl.refresh()">
 	</li>
+  <li class="tight-form-item query-keyword">
+    DSL
+  </li>
+  <li>
+    <input type="text" class="tight-form-input" style="width: 200px;" ng-model="ctrl.target.dslQuery" spellcheck='false' placeholder="Copy & Paste!" ng-blur="ctrl.refresh()">
+  </li>
 </query-editor-row>
 
 <div ng-repeat="agg in ctrl.target.metrics">

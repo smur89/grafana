@@ -168,18 +168,45 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
         target = options.targets[i];
         if (target.hide) {continue;}
 
-        var queryObj = this.queryBuilder.build(target);
-        var esQuery = angular.toJson(queryObj);
-        var luceneQuery = angular.toJson(target.query || '*');
-        // remove inner quotes
-        luceneQuery = luceneQuery.substr(1, luceneQuery.length - 2);
-        esQuery = esQuery.replace("$lucene_query", luceneQuery);
+        var luceneQueries = getLuceneQuery(target, templateSrv);
+        var queryObj, esQuery = {};
+        if (luceneQueries.length > 1) {
+          queryObj = this.queryBuilder.buildMultiple(target);
+          esQuery = angular.toJson(queryObj);
+          var queriesJson = {"bool" : { "should" : []}};
+          for (var index = 0, len = luceneQueries.length; index < len; index++){
+            queriesJson.bool.should.push(
+            {
+              "query_string": {
+                "query": luceneQueries[index].query
+              }
+            });
+          }
+          esQuery = JSON.parse(esQuery);
+          esQuery.query.filtered.query = queriesJson;
+          esQuery = angular.toJson(esQuery);
+        } else {
+          queryObj = this.queryBuilder.build(target);
+          esQuery = angular.toJson(queryObj);
+          var luceneQuery = angular.toJson(target.query || '*');
+          // remove inner quotes
+          luceneQuery = luceneQuery.substr(1, luceneQuery.length - 2);
+          esQuery = esQuery.replace("$lucene_query", luceneQuery);
+        }
 
         var searchType = queryObj.size === 0 ? 'count' : 'query_then_fetch';
         var header = this.getQueryHeader(searchType, options.range.from, options.range.to);
         payload +=  header + '\n';
 
-        payload += esQuery + '\n';
+        if(!target.dslQuery){
+          payload += esQuery + '\n';
+        } else {
+          var dslQuery = target.dslQuery;
+          var timeRange = this.queryBuilder.getRangeFilter();
+          dslQuery = dslQuery.replace("$time_range", timeRange);
+          payload += dslQuery + '\n';
+        }
+
         sentTargets.push(target);
       }
 
@@ -302,6 +329,42 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
         return displayHits;
       });
     };
+  }
+
+  function parseTarget(target, templateSrv) {
+    // When you first make the panel, the object doesnt contain propterties
+    // it's later populated
+    if (target) {
+      var queryInterpolated = templateSrv.replace(target.query);
+      var orSplit = queryInterpolated.substring(0, queryInterpolated.indexOf(" AND ")).trim();
+      var andSplit = " " + queryInterpolated.substring(queryInterpolated.indexOf(" AND ")).trim();
+     // Don't add a query if it's going to be the same as the first query
+      if (orSplit.indexOf(" OR ") !== -1) {
+        var parsedQueries = orSplit.split(" OR ");
+        return splitQueries(target, parsedQueries, andSplit);
+      } else {
+        return splitQueries(target, [orSplit], andSplit);
+      }
+    }
+  }
+
+  function splitQueries(target, queries, andFilters) {
+    var queriesArray = [];
+    for (var i in queries) {
+      var newTarget = {
+        alias: queries[i].split(":")[1],
+        datasource: target.datasource ? target.datasource : undefined,
+        query: andFilters ? queries[i] + andFilters : queries[i],
+        metrics: target.metrics,
+        bucketAggs: target.bucketAggs
+      };
+      queriesArray.push(newTarget);
+    }
+    return queriesArray;
+  }
+
+  function getLuceneQuery(target, templateSrv){
+    return parseTarget(target, templateSrv);
   }
 
   return {

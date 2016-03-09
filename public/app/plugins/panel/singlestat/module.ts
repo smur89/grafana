@@ -190,6 +190,11 @@ class SingleStatCtrl extends MetricsPanelCtrl {
         data.valueRounded = 0;
       } else {
         data.value = this.series[0].stats[this.panel.valueName];
+        var total = 0;
+        for (var index in this.series[0].datapoints) {
+          var datapoint = this.series[0].datapoints[index];
+          total += datapoint[0];
+        }
         data.flotpairs = this.series[0].flotpairs;
 
         var decimalInfo = this.getDecimalsForValue(data.value);
