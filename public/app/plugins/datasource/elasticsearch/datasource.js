@@ -160,50 +160,45 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
     };
 
     this.query = function(options) {
-      var payload = "";
-      var target;
-      var sentTargets = [];
+        var payload = "";
+        var target;
+        var sentTargets = [];
 
-      for (var i = 0; i < options.targets.length; i++) {
-        target = options.targets[i];
-        if (target.hide) {continue;}
+        for (var i = 0; i < options.targets.length; i++) {
+          target = options.targets[i];
+          if (target.hide) {continue;}
 
-        var queryObj = this.queryBuilder.build(target);
-        var esQuery = angular.toJson(queryObj);
-        var luceneQuery = angular.toJson(target.query || '*');
-        // remove inner quotes
-        luceneQuery = luceneQuery.substr(1, luceneQuery.length - 2);
-        esQuery = esQuery.replace("$lucene_query", luceneQuery);
+          var queryObj = this.queryBuilder.build(target);
+          var esQuery = angular.toJson(queryObj);
+          var luceneQuery = target.query || '*';
+          luceneQuery = templateSrv.replace(luceneQuery, options.scopedVars, 'lucene');
+          luceneQuery = angular.toJson(luceneQuery);
 
-        var searchType = queryObj.size === 0 ? 'count' : 'query_then_fetch';
-        var header = this.getQueryHeader(searchType, options.range.from, options.range.to);
-        payload +=  header + '\n';
+          // remove inner quotes
+          luceneQuery = luceneQuery.substr(1, luceneQuery.length - 2);
+          esQuery = esQuery.replace("$lucene_query", luceneQuery);
 
-        if(!target.dslQuery){
+          var searchType = queryObj.size === 0 ? 'count' : 'query_then_fetch';
+          var header = this.getQueryHeader(searchType, options.range.from, options.range.to);
+          payload +=  header + '\n';
+
           payload += esQuery + '\n';
-        } else {
-          var dslQuery = target.dslQuery;
-          var timeRange = this.queryBuilder.getRangeFilter();
-          dslQuery = dslQuery.replace("$time_range", timeRange);
-          payload += dslQuery + '\n';
+          sentTargets.push(target);
         }
 
-        sentTargets.push(target);
-      }
+        if (sentTargets.length === 0) {
+          return $q.when([]);
+        }
 
-      if (sentTargets.length === 0) {
-        return $q.when([]);
-      }
+        payload = payload.replace(/\$interval/g, options.interval);
+        payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf());
+        payload = payload.replace(/\$timeTo/g, options.range.to.valueOf());
+        payload = templateSrv.replace(payload, options.scopedVars);
 
-      payload = payload.replace(/\$interval/g, options.interval);
-      payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf());
-      payload = payload.replace(/\$timeTo/g, options.range.to.valueOf());
-      payload = templateSrv.replace(payload, options.scopedVars);
-
-      return this._post('_msearch', payload).then(function(res) {
-        return new ElasticResponse(sentTargets, res).getTimeSeries();
-      });
-    };
+        return this._post('_msearch', payload).then(function(res) {
+          return new ElasticResponse(sentTargets, res).getTimeSeries();
+        });
+      };
 
     this.getFields = function(query) {
       return this._get('/_mapping').then(function(res) {
