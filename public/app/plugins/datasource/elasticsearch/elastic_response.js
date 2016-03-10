@@ -77,15 +77,18 @@ function (_, queryDef) {
         }
         default: {
           newSeries = { datapoints: [], metric: metric.type, field: metric.field, props: props};
+          var count = 0;
           for (i = 0; i < esAgg.buckets.length; i++) {
             bucket = esAgg.buckets[i];
 
             value = bucket[metric.id];
             if (value !== undefined) {
               if (value.normalized_value) {
-                newSeries.datapoints.push([value.normalized_value, bucket.key]);
+                count += bucket.doc_count;
+                newSeries.datapoints.push([value.normalized_value, bucket.key, bucket.doc_count]);
               } else {
-                newSeries.datapoints.push([value.value, bucket.key]);
+                count += bucket.doc_count;
+                newSeries.datapoints.push([value.value, bucket.key, bucket.doc_count]);
               }
             }
 

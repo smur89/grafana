@@ -104,11 +104,13 @@ export default class TimeSeries {
     var nullAsZero = fillStyle === 'null as zero';
     var currentTime;
     var currentValue;
+    var docCount = 0;
     var nonNulls = 0;
 
     for (var i = 0; i < this.datapoints.length; i++) {
       currentValue = this.datapoints[i][0];
       currentTime = this.datapoints[i][1];
+      docCount += this.datapoints[i][2];
 
       if (currentValue === null) {
         if (ignoreNulls) { continue; }
@@ -147,15 +149,16 @@ export default class TimeSeries {
     if (this.stats.max === -Number.MAX_VALUE) { this.stats.max = null; }
     if (this.stats.min === Number.MAX_VALUE) { this.stats.min = null; }
 
+    this.stats.count = docCount;
+
     if (result.length) {
-      this.stats.avg = (this.stats.total / nonNulls);
+      this.stats.avg = (this.stats.total / this.stats.count);
       this.stats.current = result[result.length-1][1];
       if (this.stats.current === null && result.length > 1) {
         this.stats.current = result[result.length-2][1];
       }
     }
 
-    this.stats.count = result.length;
     return result;
   }
 
