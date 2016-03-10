@@ -5,7 +5,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment';
 import * as FileExport from 'app/core/utils/file_export';
-import {MetricsPanelCtrl} from 'app/plugins/sdk';
+import {MultipleMetricsPanelCtrl} from 'app/plugins/sdk';
 import {transformDataToTable} from './transformers';
 import {tablePanelEditor} from './editor';
 import {TableRenderer} from './renderer';
@@ -37,7 +37,7 @@ var panelDefaults = {
   sort: {col: 0, desc: true},
 };
 
-class TablePanelCtrl extends MetricsPanelCtrl {
+class TablePanelCtrl extends MultipleMetricsPanelCtrl {
   static templateUrl = 'module.html';
 
   pageIndex: number;
@@ -46,7 +46,7 @@ class TablePanelCtrl extends MetricsPanelCtrl {
 
   /** @ngInject */
   constructor($scope, $injector, private annotationsSrv, templateSrv) {
-    super($scope, $injector);
+    super($scope, $injector, templateSrv);
     this.pageIndex = 0;
 
     if (this.panel.styles === void 0) {
