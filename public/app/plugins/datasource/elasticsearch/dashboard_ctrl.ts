@@ -34,6 +34,7 @@ export class ElasticDashboardCtrl extends DashboardCtrl {
        this.refresh();
      }
 
+     this.$rootScope.appEvent('elastic--dashboard-query-updated');
      this.$rootScope.appEvent('elastic-query-updated');
    }
 

@@ -185,7 +185,7 @@ function (_, sdk, kbn, TimeSeries, rendering) {
 
     return PieChartCtrl;
 
-  })(sdk.MultipleMetricsPanelCtrl);
+  })(sdk.MetricsPanelCtrl);
 
   return {
     PanelCtrl: PieChartCtrl

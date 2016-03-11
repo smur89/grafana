@@ -9,7 +9,7 @@ import kbn from 'app/core/utils/kbn';
 import _ from 'lodash';
 import TimeSeries from 'app/core/time_series2';
 import * as fileExport from 'app/core/utils/file_export';
-import {MetricsPanelCtrl} from 'app/plugins/sdk';
+import {MultipleMetricsPanelCtrl} from 'app/plugins/sdk';
 
 var panelDefaults = {
   // datasource name, null = default datasource
@@ -81,7 +81,7 @@ var panelDefaults = {
   seriesOverrides: [],
 };
 
-class GraphCtrl extends MetricsPanelCtrl {
+class GraphCtrl extends MultipleMetricsPanelCtrl {
   static templateUrl = 'module.html';
 
   hiddenSeries: any = {};
@@ -96,7 +96,7 @@ class GraphCtrl extends MetricsPanelCtrl {
 
   /** @ngInject */
   constructor($scope, $injector, private annotationsSrv, templateSrv) {
-    super($scope, $injector);
+    super($scope, $injector, templateSrv);
 
     _.defaults(this.panel, panelDefaults);
     _.defaults(this.panel.tooltip, panelDefaults.tooltip);
