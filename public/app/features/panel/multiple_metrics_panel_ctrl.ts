@@ -36,7 +36,7 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
     this.datasourceSrv = $injector.get('datasourceSrv');
     this.timeSrv = $injector.get('timeSrv');
     this.templateSrv = templateSrv;
-    this.parseTargets(this.panel.targets);
+    this.initTargets();
 
     if (!this.panel.targets) {
       this.panel.targets = [{}];
@@ -73,11 +73,11 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
       return;
     }
 
+    this.initTargets();
     // clear loading/error state
     delete this.error;
     this.loading = true;
 
-    this.parseTargets(this.panel.targets);
     // load datasource service
     this.datasourceSrv.get(this.panel.datasource).then(datasource => {
       this.datasource = datasource;
@@ -213,52 +213,49 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
     this.refresh();
   }
 
-  addDataQuery(datasource) {
-    var target = {
-      datasource: datasource ? datasource.name : undefined
-    };
-    this.panel.targets.push(target);
+  initTargets(){
+      var dashTargets = this.dashboard.targets;
+      var panelTargets = this.panel.targets;
+      if (dashTargets) {
+        panelTargets.splice(dashTargets.length, panelTargets.length);
+        for (var i = 0; i < dashTargets.length; i++) {
+          if (panelTargets[i]) {
+            if (dashTargets[i].query !== panelTargets[i].query || dashTargets[i].alias !== panelTargets[i].alias) {
+              panelTargets[i].query = dashTargets[i].query;
+              panelTargets[i].alias = dashTargets[i].alias;
+            }
+          } else {
+            var newTarget = {
+              query: dashTargets[i].query
+            };
+            panelTargets.push(newTarget);
+          }
+
+        }
+      }
+    this.panel.targets = this.replicateMetricsAndAggs(panelTargets);
   }
 
-   parseTargets(targets) {
-      var andFilters;
-      if (targets && targets.length === 1) {
+   replicateMetricsAndAggs(targets) {
+      if (targets) {
         // When you first make the panel, the object doesnt contain propterties
         // it's later populated
         if (targets[0].query) {
-          var queryInterpolated = this.templateSrv.replace(targets[0].query);
-          var orSplit = queryInterpolated.substring(0, queryInterpolated.indexOf(" AND ")).trim();
-          // Remove brackets from OR statements
-          if (orSplit.indexOf("(") === 0 && orSplit.indexOf(")") === orSplit.length-1) {
-            orSplit = orSplit.substring(1, orSplit.length-1);
-          };
-          var andSplit = " " + queryInterpolated.substring(queryInterpolated.indexOf(" AND ")).trim();
-          // Don't add a query if it's going to be the same as the first query
-          if (orSplit.indexOf(" OR ") !== -1) {
-            var parsedQueries = orSplit.split(" OR ");
-            if (andSplit) {
-              andFilters = andSplit;
-            }
-            var splitTargets = this.splitQueries(targets[0], parsedQueries, andFilters);
+          for (var i = 1; i < targets.length; i++) {
+            targets[i].metrics = targets[0].metrics;
+            targets[i].bucketAggs = targets[0].bucketAggs;
           }
         }
       }
+      return targets;
    }
 
-   splitQueries(target, queries, andFilters){
-   this.panel.targets = [];
-    for (var i in queries) {
-      var newTarget = {
-        alias: queries[i].split(":")[1],
-        datasource: target.datasource ? target.datasource : undefined,
-        query: andFilters ? queries[i] + andFilters : queries[i],
-        metrics: target.metrics,
-        bucketAggs: target.bucketAggs
-      };
-      this.panel.targets.push(newTarget);
-    }
+   addDataQuery(datasource) {
+     var target = {
+       datasource: datasource ? datasource.name : undefined
+     };
+     this.panel.targets.push(target);
    }
-
 }
 
 export {MultipleMetricsPanelCtrl};

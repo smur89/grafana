@@ -3,7 +3,7 @@ module.exports = function(config,grunt) {
 
   grunt.registerTask('phantomjs', 'Copy phantomjs binary from node', function() {
 
-    var dest = './vendor/phantomjs/phantomjs';
+    var dest = './vendor/phantomjs/phantomjs.exe';
     var confDir = './node_modules/karma-phantomjs-launcher/node_modules/phantomjs/lib/'
 
     if (!grunt.file.exists(confDir)) {

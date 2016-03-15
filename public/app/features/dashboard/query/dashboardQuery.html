@@ -1,5 +1,7 @@
 <div>
-  <div class="editor-row">
+  <a href="#" class="submenu-item" ng-model="collapsed" ng-click="collapsed=!collapsed">Show/Hide Queries</a>
+
+  <div class="editor-row" ng-show="collapsed">
 
     <div class="tight-form-container">
       <div ng-repeat="target in ctrl.dashboard.targets" ng-class="{'tight-form-disabled': target.hide}">
