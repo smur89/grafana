@@ -83,11 +83,10 @@ function (_, queryDef) {
 
             value = bucket[metric.id];
             if (value !== undefined) {
+              count += bucket.doc_count;
               if (value.normalized_value) {
-                count += bucket.doc_count;
                 newSeries.datapoints.push([value.normalized_value, bucket.key, bucket.doc_count]);
               } else {
-                count += bucket.doc_count;
                 newSeries.datapoints.push([value.value, bucket.key, bucket.doc_count]);
               }
             }
@@ -287,13 +286,29 @@ function (_, queryDef) {
     }
   };
 
+  ElasticResponse.prototype.getErrorFromElasticResponse = function(response, err) {
+    var result = {};
+    result.data = JSON.stringify(err, null, 4);
+    if (err.root_cause && err.root_cause.length > 0 && err.root_cause[0].reason) {
+      result.message = err.root_cause[0].reason;
+    } else {
+      result.message = err.reason || 'Unkown elatic error response';
+    }
+
+    if (response.$$config) {
+      result.config = response.$$config;
+    }
+
+    return result;
+  };
+
   ElasticResponse.prototype.getTimeSeries = function() {
     var seriesList = [];
 
     for (var i = 0; i < this.response.responses.length; i++) {
       var response = this.response.responses[i];
       if (response.error) {
-        throw { message: response.error };
+        throw this.getErrorFromElasticResponse(this.response, response.error);
       }
 
       if (response.hits && response.hits.hits.length > 0) {

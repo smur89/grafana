@@ -194,7 +194,7 @@ define([
       });
 
       it('dashboard schema version should be set to latest', function() {
-        expect(model.schemaVersion).to.be(10);
+        expect(model.schemaVersion).to.be(11);
       });
 
     });
@@ -320,6 +320,28 @@ define([
       it('should add empty list', function() {
         expect(model.annotations.list.length).to.be(0);
         expect(model.templating.list.length).to.be(0);
+      });
+    });
+
+    describe('Formatting epoch timestamp when timezone is set as utc', function() {
+      var dashboard;
+
+      beforeEach(function() {
+        dashboard = _dashboardSrv.create({
+          timezone: 'utc',
+        });
+      });
+
+      it('Should format timestamp with second resolution by default', function() {
+        expect(dashboard.formatDate(1234567890000)).to.be('2009-02-13 23:31:30');
+      });
+
+      it('Should format timestamp with second resolution even if second format is passed as parameter', function() {
+        expect(dashboard.formatDate(1234567890007,'YYYY-MM-DD HH:mm:ss')).to.be('2009-02-13 23:31:30');
+      });
+
+      it('Should format timestamp with millisecond resolution if format is passed as parameter', function() {
+        expect(dashboard.formatDate(1234567890007,'YYYY-MM-DD HH:mm:ss.SSS')).to.be('2009-02-13 23:31:30.007');
       });
     });
 

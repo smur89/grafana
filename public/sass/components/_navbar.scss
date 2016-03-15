@@ -63,10 +63,13 @@
   margin: 0;
   border-right: 1px solid $tight-form-border;
   background-color: $navbarButtonBackground;
-  padding: 0.6rem 1.0rem 0.5rem 1rem;
+  padding: 0.4rem 1.0rem 0.4rem 1rem;
 
   .fa-caret-down {
     font-size: 70%;
+  }
+  .fa-chevron-left{
+    display: none;
   }
 
   &:hover {
@@ -110,7 +113,7 @@
   color: darken($link-color, 5%);
   background-color: $navbarButtonBackground;
   font-size: $font-size-lg;
-  padding: 1rem 0.8rem;
+  padding: 1rem 1rem 0.7rem 1rem;
 
   &:hover {
     background: $navbarButtonBackgroundHighlight;
@@ -122,16 +125,33 @@
     padding-left: 0.2rem;
   }
 
-  .fa-th-large {
-    position: relative;
-    top: 2px;
-  }
-
   .icon-gf {
     position: relative;
     top: 2px;
     font-size: 20px;
     line-height: 8px;
+  }
+}
+
+.sidemenu-pinned {
+  .navbar-brand-btn {
+    background-color: $page-bg;
+    width: $side-menu-width;
+
+    .icon-gf-grafana_wordmark  {
+      display: inline-block;
+    }
+
+    .fa-caret-down {
+      display: none;
+    }
+
+    &:hover .fa-chevron-left {
+      display: inline-block;
+      color: $text-color-weak;
+      position: relative;
+      left: 1.3rem;
+    }
   }
 }
 

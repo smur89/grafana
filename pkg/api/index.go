@@ -72,7 +72,7 @@ func setIndexViewData(c *middleware.Context) (*dtos.IndexViewData, error) {
 		data.MainNavLinks = append(data.MainNavLinks, &dtos.NavLink{
 			Text: "Plugins",
 			Icon: "icon-gf icon-gf-apps",
-			Url:  setting.AppSubUrl + "/apps",
+			Url:  setting.AppSubUrl + "/plugins",
 		})
 	}
 
@@ -85,15 +85,17 @@ func setIndexViewData(c *middleware.Context) (*dtos.IndexViewData, error) {
 		if plugin.Pinned {
 			pageLink := &dtos.NavLink{
 				Text: plugin.Name,
-				Url:  setting.AppSubUrl + "/apps/" + plugin.Id + "/edit",
+				Url:  setting.AppSubUrl + "/plugins/" + plugin.Id + "/edit",
 				Img:  plugin.Info.Logos.Small,
 			}
 
 			for _, page := range plugin.Pages {
-				pageLink.Children = append(pageLink.Children, &dtos.NavLink{
-					Url:  setting.AppSubUrl + "/apps/" + plugin.Id + "/page/" + page.Slug,
-					Text: page.Name,
-				})
+				if !page.SuppressNav {
+					pageLink.Children = append(pageLink.Children, &dtos.NavLink{
+						Url:  setting.AppSubUrl + "/plugins/" + plugin.Id + "/page/" + page.Slug,
+						Text: page.Name,
+					})
+				}
 			}
 
 			data.MainNavLinks = append(data.MainNavLinks, pageLink)

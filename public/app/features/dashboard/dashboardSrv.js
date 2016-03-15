@@ -141,7 +141,11 @@ function (angular, $, _, moment) {
     };
 
     p.isSubmenuFeaturesEnabled = function() {
-      return this.templating.list.length > 0 || this.annotations.list.length > 0 || this.links.length > 0;
+      var visableTemplates = _.filter(this.templating.list, function(template) {
+        return template.hideVariable === undefined || template.hideVariable === false;
+      });
+
+      return visableTemplates.length > 0 || this.annotations.list.length > 0 || this.links.length > 0;
     };
 
     p.getPanelInfoById = function(panelId) {
@@ -209,7 +213,7 @@ function (angular, $, _, moment) {
       var i, j, k;
       var oldVersion = this.schemaVersion;
       var panelUpgrades = [];
-      this.schemaVersion = 10;
+      this.schemaVersion = 11;
 
       if (oldVersion === this.schemaVersion) {
         return;
@@ -395,6 +399,14 @@ function (angular, $, _, moment) {
               style.thresholds = k;
             }
           });
+        });
+      }
+
+      if (oldVersion < 11) {
+        // update template variables
+        _.each(this.templating.list, function(templateVariable) {
+          if (templateVariable.refresh) { templateVariable.refresh = 1; }
+          if (!templateVariable.refresh) { templateVariable.refresh = 0; }
         });
       }
 

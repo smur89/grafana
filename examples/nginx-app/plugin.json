@@ -34,8 +34,14 @@
     "updated": "2015-02-10"
   },
 
+  "includes": [
+    {"type": "dashboard", "name": "Nginx Connection stats", "path": "dashboards/nginx_connection_stats.json"},
+    {"type": "panel", "name": "Nginx Panel"},
+    {"type": "datasource", "name": "Nginx Datasource"}
+  ],
+
   "dependencies": {
-    "grafanaVersion": "2.6.x",
+    "grafanaVersion": "3.x.x",
     "plugins": [
       {"type": "datasource", "id": "graphite", "name": "Graphite", "version": "1.0.0"},
       {"type": "panel", "id": "graph", "name": "Graph", "version": "1.0.0"}
