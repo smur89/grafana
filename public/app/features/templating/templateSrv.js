@@ -38,9 +38,9 @@ function (angular, _) {
       return value.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
-    function luceneEscape(value) {
-      return value.replace(/([\!\*\+\-\=<>\s\&\|\(\)\[\]\{\}\^\~\?\:\\/"])/g, "\\$1");
-    }
+//    function luceneEscape(value) {
+//      return value.replace(/([\!\*\+\-\=<>\s\&\|\(\)\[\]\{\}\^\~\?\:\\/"])/g, "\\$1");
+//    }
 
     this.formatValue = function(value, format, variable) {
       if (typeof format === 'function') {
@@ -57,13 +57,14 @@ function (angular, _) {
           return escapedValues.join('|');
         }
         case "lucene": {
-          if (typeof value === 'string') {
-            return luceneEscape(value);
-          }
-          var quotedValues = _.map(value, function(val) {
-            return '\"' + luceneEscape(val) + '\"';
-          });
-          return '(' + quotedValues.join(' OR ') + ')';
+//          if (typeof value === 'string') {
+//            return luceneEscape(value);
+//          }
+//          var quotedValues = _.map(value, function(val) {
+//            return '\"' + luceneEscape(val) + '\"';
+////          });
+//          return '(' + quotedValues.join(' OR ') + ')';
+          return '(' + _.pluck(variable.options, 'text').join(' OR ') + ')';
         }
         case "pipe": {
           return value.join('|');

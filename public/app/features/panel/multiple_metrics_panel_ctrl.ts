@@ -215,7 +215,7 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
 
   initTargets(){
       var dashTargets = this.dashboard.targets;
-      var panelTargets = this.panel.targets;
+      var panelTargets = this.panel.targets ? this.panel.targets : [];
       if (dashTargets) {
         panelTargets.splice(dashTargets.length, panelTargets.length);
         for (var i = 0; i < dashTargets.length; i++) {
