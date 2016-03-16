@@ -57,7 +57,7 @@ function (queryDef) {
     esAgg.interval = settings.interval;
     esAgg.field = this.timeField;
     esAgg.min_doc_count = settings.min_doc_count || 0;
-    esAgg.extended_bounds = {min: "$timeFrom", max: "$timeTo"};
+    esAgg.extended_bounds = {min: "$timeFrom", max: "$BoundsTimeTo"};
 
     if (esAgg.interval === 'auto') {
       esAgg.interval = "$interval";

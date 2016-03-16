@@ -14,7 +14,6 @@ function (_, sdk, kbn, TimeSeries, rendering) {
     pieType: 'pie',
     legend: {
       show: true, // disable/enable legend
-      legendType: 'rightSide',
       values: false, // disable/enable legend values
       min: false,
       max: false,
@@ -29,13 +28,15 @@ function (_, sdk, kbn, TimeSeries, rendering) {
     targets: [{}],
     cacheTimeout: null,
     nullText: null,
-    nullPointMode: 'connected'
+    nullPointMode: 'connected',
+    legendType: 'rightSide',
+    format: 'short'
   };
 
   var PieChartCtrl = (function(_super) {
 
-    function PieChartCtrl($scope, $injector, $rootScope, templateSrv) {
-      _super.call(this, $scope, $injector, templateSrv);
+    function PieChartCtrl($scope, $injector, $rootScope) {
+      _super.call(this, $scope, $injector);
       this.$rootScope = $rootScope;
 
       _.defaults(this.panel, panelDefaults);
@@ -44,13 +45,12 @@ function (_, sdk, kbn, TimeSeries, rendering) {
 
     PieChartCtrl.prototype = Object.create(_super.prototype);
     PieChartCtrl.prototype.constructor = PieChartCtrl;
-
-    PieChartCtrl.templateUrl = 'public/plugins/piechart/module.html';
+    PieChartCtrl.templateUrl = 'module.html';
 
     PieChartCtrl.prototype.initEditMode = function() {
       _super.prototype.initEditMode.call(this);
       this.icon =  "fa fa-dashboard";
-      this.addEditorTab('Options', 'public/plugins/piechart/editor.html', 2);
+      this.addEditorTab('Options', 'public/app/plugins/panel/multiple_piechart/editor.html', 2);
       this.unitFormats = kbn.getUnitFormats();
     };
 
@@ -152,8 +152,7 @@ function (_, sdk, kbn, TimeSeries, rendering) {
           data.flotpairs = this.series[0].flotpairs;
 
           var decimalInfo = this.getDecimalsForValue(data.value);
-          var formatFunc = kbn.valueFormats[this.panel.format];
-          data.valueFormated = formatFunc(data.value, decimalInfo.decimals, decimalInfo.scaledDecimals);
+          data.valueFormated = this.formatValue(data.value);
           data.valueRounded = kbn.roundValue(data.value, decimalInfo.decimals);
         }
       }
@@ -161,6 +160,15 @@ function (_, sdk, kbn, TimeSeries, rendering) {
       if (data.value === null || data.value === void 0) {
         data.valueFormated = "no value";
       }
+    };
+
+    PieChartCtrl.prototype.formatValue = function(value) {
+      var decimalInfo = this.getDecimalsForValue(value);
+      var formatFunc = kbn.valueFormats[this.panel.format];
+      if (formatFunc) {
+        return formatFunc(value, decimalInfo.decimals, decimalInfo.scaledDecimals);
+      }
+      return value;
     };
 
     PieChartCtrl.prototype.removeValueMap = function(map) {

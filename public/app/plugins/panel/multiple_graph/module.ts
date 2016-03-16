@@ -110,8 +110,8 @@ class GraphCtrl extends MultipleMetricsPanelCtrl {
     super.initEditMode();
 
     this.icon = "fa fa-bar-chart";
-    this.addEditorTab('Axes & Grid', 'public/app/plugins/panel/graph/axisEditor.html', 2);
-    this.addEditorTab('Display Styles', 'public/app/plugins/panel/graph/styleEditor.html', 3);
+    this.addEditorTab('Axes & Grid', 'public/app/plugins/panel/multiple_graph/axisEditor.html', 2);
+    this.addEditorTab('Display Styles', 'public/app/plugins/panel/multiple_graph/styleEditor.html', 3);
 
     this.logScales = {
       'linear': 1,
