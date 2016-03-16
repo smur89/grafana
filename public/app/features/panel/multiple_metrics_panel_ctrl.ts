@@ -214,9 +214,15 @@ class MultipleMetricsPanelCtrl extends PanelCtrl {
   }
 
   initTargets(){
-      var dashTargets = this.dashboard.targets;
+      var dashTargets = [];
       var panelTargets = this.panel.targets ? this.panel.targets : [];
-      if (dashTargets) {
+      if (this.dashboard.targets) {
+        for (var i = 0; i < this.dashboard.targets.length; i++) {
+          if (!this.dashboard.targets[i].hide) {
+            dashTargets.push(this.dashboard.targets[i]);
+          }
+        }
+
         panelTargets.splice(dashTargets.length, panelTargets.length);
         for (var i = 0; i < dashTargets.length; i++) {
           if (panelTargets[i]) {
