@@ -197,6 +197,7 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
       payload = payload.replace(/\$interval/g, options.interval);
       payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf());
       payload = payload.replace(/\$timeTo/g, options.range.to.valueOf());
+      payload = payload.replace(/\$BoundsTimeTo/g, options.range.to.millisecond(options.range.to.millisecond()-1).valueOf());
       payload = templateSrv.replace(payload, options.scopedVars);
 
       return this._post('_msearch', payload).then(function(res) {
@@ -248,6 +249,7 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
 
       esQuery = esQuery.replace("$lucene_query", queryDef.query || '*');
       esQuery = esQuery.replace(/\$timeFrom/g, range.from.valueOf());
+      esQuery = esQuery.replace(/\$BoundsTimeTo/g, range.to.milliseconds(range.to.milliseconds()-1).valueOf());
       esQuery = esQuery.replace(/\$timeTo/g, range.to.valueOf());
       esQuery = header + '\n' + esQuery + '\n';
 
