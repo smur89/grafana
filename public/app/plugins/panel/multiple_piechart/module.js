@@ -128,9 +128,13 @@ function (_, sdk, kbn, TimeSeries, rendering) {
 
       if (this.series && this.series.length > 0) {
         for (var i=0; i < this.series.length; i++) {
-          data.push({label: this.series[i].alias, data: this.series[i].stats.current, color: this.$rootScope.colors[i]});
+//          data.push({label: this.series[i].alias, data: this.series[i].stats.current, color: this.$rootScope.colors[i]});
+          data.push({label: this.series[i].alias, data: this.series[i].stats.total, color: this.$rootScope.colors[i]});
         }
       }
+      data.sort(function(a, b) {
+        return parseFloat(b.data) - parseFloat(a.data);
+      });
 
       this.data = data;
       this.broadcastRender(data);
