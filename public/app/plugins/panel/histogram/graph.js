@@ -222,7 +222,7 @@ function (angular, $, moment, _, kbn, GraphTooltip) {
           for (var i = 0; i < data.length; i++) {
             var series = data[i];
             if (panel.histogram) {
-              series.data = series.getHistogramPairs(panel.nullPointMode, panel.bucketSize);
+              series.data = series.getHistogramPairs(series.nullPointMode || panel.nullPointMode, panel.bucketSize);
             } else {
               series.data = series.getFlotPairs(series.nullPointMode || panel.nullPointMode, panel.y_formats);
             }
@@ -242,11 +242,8 @@ function (angular, $, moment, _, kbn, GraphTooltip) {
             options.selection = {};
           } else {
             addTimeAxis(options);
-            addGridThresholds(options, panel);
-            addAnnotations(options);
           }
 
-          addTimeAxis(options);
           addGridThresholds(options, panel);
           addAnnotations(options);
           configureAxisOptions(data, options);
@@ -255,7 +252,7 @@ function (angular, $, moment, _, kbn, GraphTooltip) {
 
           function addHistogramAxis(options) {
             options.xaxis = {
-              show: scope.panel['x-axis'],
+              show: ctrl.panel['x-axis'],
               label: "Values"
             };
           }

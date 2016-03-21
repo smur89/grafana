@@ -60,12 +60,12 @@
   <div class="section">
     <h5>Histogram</h5>
     <editor-opt-bool
-      text="Histogram" model="panel.histogram" change="render()"
+      text="Histogram" model="ctrl.panel.histogram" change="ctrl.render()"
       tip="Render as Histogram">
     </editor-opt-bool>
     <div class="editor-option" ng-show="panel.histogram">
       <label class="small">Bucket Size</label>
-      <input type="text" class="input-mini" ng-model="panel.bucketSize" ng-change="render()">
+      <input type="text" class="input-mini" ng-model="ctrl.panel.bucketSize" ng-change="ctrl.render()">
     </div>
   </div>
 </div>

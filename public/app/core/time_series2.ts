@@ -89,6 +89,69 @@ export default class TimeSeries {
     }
   };
 
+  getHistogramPairs(fillStyle, bucketSize) {
+    var result = [];
+    if (bucketSize === null || bucketSize === 0) {
+      bucketSize = 1;
+    }
+
+    this.yaxis = 1; // TODO check
+
+    this.stats.total = 0;
+    this.stats.max = Number.MIN_VALUE;
+    this.stats.min = Number.MAX_VALUE;
+    this.stats.avg = null;
+    this.stats.current = null;
+
+    var ignoreNulls = fillStyle === 'connected' || fillStyle === 'null';
+    var nullAsZero = fillStyle === 'null as zero';
+    var values = {};
+    var currentValue;
+
+    for (var i = 0; i < this.datapoints.length; i++) {
+      currentValue = this.datapoints[i][0];
+
+      if (currentValue === null) {
+        if (ignoreNulls) { continue; }
+        if (nullAsZero) {
+        currentValue = 0;
+        }
+      }
+
+      if (_.isNumber(currentValue)) {
+        this.stats.total += currentValue;
+      }
+
+      if (currentValue > this.stats.max) {
+        this.stats.max = currentValue;
+      }
+
+      if (currentValue < this.stats.min) {
+        this.stats.min = currentValue;
+      }
+      var bucket = (Math.floor(currentValue / bucketSize)*bucketSize).toFixed(3);
+      if (bucket in values) {
+        values[bucket]++;
+      } else {
+        values[bucket] = 1;
+      }
+    }
+
+    _.forEach(Object.keys(values).sort(), function(key) {
+      result.push([key, values[key]]);
+    });
+    this.stats.timeStep = bucketSize;
+    if (this.stats.max === Number.MIN_VALUE) { this.stats.max = null; }
+    if (this.stats.min === Number.MAX_VALUE) { this.stats.min = null; }
+
+    if (result.length) {
+      this.stats.avg = (this.stats.total / result.length);
+      this.stats.current = currentValue;
+    }
+    this.stats.count = result.length;
+    return result;
+  }
+
   getFlotPairs(fillStyle) {
     var result = [];
 

@@ -133,11 +133,11 @@ function ($) {
         seriesHtml = '';
 
         relativeTime = dashboard.getRelativeTime(seriesHoverInfo.time);
-        if (scope.panel.histogram) {
-          absoluteTime = dashboard.formatValue(seriesHoverInfo.time, tooltipFormat);
-        } else {
-          absoluteTime = dashboard.formatDate(seriesHoverInfo.time, tooltipFormat);
-        }
+//        if (ctrl.panel.histogram) {
+//          absoluteTime = series.formatValue(seriesHoverInfo.time, tooltipFormat);
+//        } else {
+        absoluteTime = dashboard.formatDate(seriesHoverInfo.time, tooltipFormat);
+//        }
 
         for (i = 0; i < seriesHoverInfo.length; i++) {
           hoverInfo = seriesHoverInfo[i];
@@ -175,7 +175,7 @@ function ($) {
 
         relativeTime = dashboard.getRelativeTime(item.datapoint[0]);
         if (scope.panel.histogram) {
-          absoluteTime = dashboard.formatValue(item.datapoint[0], tooltipFormat);
+          absoluteTime = series.formatValue(item.datapoint[0], tooltipFormat);
         } else {
           absoluteTime = dashboard.formatDate(item.datapoint[0], tooltipFormat);
         }
