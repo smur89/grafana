@@ -302,11 +302,7 @@ function (_, queryDef) {
     return result;
   };
 
-  ElasticResponse.prototype.getTimeSeries = function() {
-    var seriesList = [];
-
-    for (var i = 0; i < this.response.responses.length; i++) {
-      var response = this.response.responses[i];
+  ElasticResponse.prototype.getTimeSeries = function(seriesList, response) {
       if (response.error) {
         throw this.getErrorFromElasticResponse(this.response, response.error);
       }
@@ -317,7 +313,7 @@ function (_, queryDef) {
 
       if (response.aggregations) {
         var aggregations = response.aggregations;
-        var target = this.targets[i];
+        var target = this.targets[0];
         var tmpSeriesList = [];
         var docs = [];
 
@@ -333,7 +329,7 @@ function (_, queryDef) {
           seriesList.push({target: 'docs', type: 'docs', datapoints: docs});
         }
       }
-    }
+
 
     return { data: seriesList };
   };
