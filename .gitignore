@@ -6,7 +6,10 @@ awsconfig
 /dist
 /emails/dist
 /public_gen
+<<<<<<< HEAD
 /public/vendor/npm
+=======
+>>>>>>> b47404b7361195d0db52598e3b282f2590b065e5
 /tmp
 vendor/phantomjs/phantomjs
 
@@ -31,6 +34,7 @@ public/css/*.min.css
 
 conf/custom.ini
 fig.yml
+<<<<<<< HEAD
 docker-compose.yml
 profile.cov
 /grafana
@@ -38,3 +42,8 @@ profile.cov
 /pkg/cmd/grafana-cli/grafana-cli
 /pkg/cmd/grafana-server/grafana-server
 /examples/*/dist
+=======
+profile.cov
+grafana
+.notouch
+>>>>>>> b47404b7361195d0db52598e3b282f2590b065e5

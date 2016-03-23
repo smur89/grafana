@@ -159,6 +159,12 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
       return angular.toJson(header);
     };
 
+    this.getQueryHeaderForIndex = function(searchType, index) {
+      var header = {search_type: searchType, "ignore_unavailable": true};
+      header.index = index;
+      return angular.toJson(header);
+    };
+
     this.query = function(options) {
       var payload = "";
       var target;
@@ -179,29 +185,55 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
         esQuery = esQuery.replace("$lucene_query", luceneQuery);
 
         var searchType = queryObj.size === 0 ? 'count' : 'query_then_fetch';
-        var header = this.getQueryHeader(searchType, options.range.from, options.range.to);
-        payload +=  header + '\n';
 
-        if(target.dslQuery){
-          payload += target.dslQuery;
-        } else {
-          payload += esQuery + '\n';
+        var indices = this.indexPattern.getIndexList(options.range.from, options.range.to);
+        var queryGroup = [];
+        for(var j = 0; j < indices.length; j++){
+          var header = this.getQueryHeaderForIndex(searchType, indices[j]);
+          var payload = header + '\n';
+
+          if(target.dslQuery){
+            payload += target.dslQuery;
+          } else {
+            payload += esQuery + '\n';
+          }
+
+          payload = payload.replace(/\$interval/g, options.interval);
+          payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf());
+          payload = payload.replace(/\$timeTo/g, options.range.to.valueOf());
+          payload = payload.replace(/\$BoundsTimeTo/g, options.range.to.millisecond(options.range.to.millisecond()-1).valueOf());
+          payload = templateSrv.replace(payload, options.scopedVars);
+
+          queryGroup.push(payload);
         }
         sentTargets.push(target);
+        requests.push(queryGroup);
       }
 
       if (sentTargets.length === 0) {
         return $q.when([]);
       }
 
-      payload = payload.replace(/\$interval/g, options.interval);
-      payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf());
-      payload = payload.replace(/\$timeTo/g, options.range.to.valueOf());
-      payload = payload.replace(/\$BoundsTimeTo/g, options.range.to.millisecond(options.range.to.millisecond()-1).valueOf());
-      payload = templateSrv.replace(payload, options.scopedVars);
+      function processSeriesList(index, res) {
+        new ElasticResponse(sentTargets, res).getTimeSeries(seriesList, res.responses[0], index);
+      }
+      var seriesList = [];
+      var promises = [];
 
-      return this._post('_msearch', payload).then(function(res) {
-        return new ElasticResponse(sentTargets, res).getTimeSeries();
+      for (var index = 0; index < requests.length; index++) {
+        var groupedPromises = [];
+        for (var j2 = 0; j2 < requests[index].length; j2++) {
+          var query = requests[index][j2];
+          var promise = this._post('_msearch', query);
+          groupedPromises.push(promise);
+          promises.push(promise);
+//          promise.then(processSeriesList.bind(null, index));
+        }
+        Promise.all(groupedPromises).then(processSeriesList.bind(null, index));
+      }
+
+      return Promise.all(promises).then(function() {
+        return {data: seriesList};
       });
     };
 
