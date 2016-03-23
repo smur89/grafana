@@ -203,25 +203,22 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
         return $q.when([]);
       }
 
-//      var response = {responses: []};
+      function processSeriesList(index, res) {
+        new ElasticResponse(sentTargets, res).getTimeSeries(seriesList, res.responses[0], index);
+      }
+
       var seriesList = [];
       var promises = [];
+
       for (var index = 0; index < requests.length; index++) {
         var promise = this._post('_msearch', requests[index]);
         promises.push(promise);
-        promise.then(function(res){
-           new ElasticResponse(sentTargets, res).getTimeSeries(seriesList, res.responses[0]);
-        });
+        promise.then(processSeriesList.bind(null, index));
       }
 
-      return Promise.all(promises).then(function(){
-        return seriesList;
+      return Promise.all(promises).then(function() {
+        return {data: seriesList};
       });
-
-
-//      return this._post('_msearch', payload).then(function(res) {
-//        return new ElasticResponse(sentTargets, res).getTimeSeries();
-//      });
     };
 
     this.getFields = function(query) {
