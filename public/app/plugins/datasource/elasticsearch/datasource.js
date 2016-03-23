@@ -160,11 +160,12 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
     };
 
     this.query = function(options) {
-      var payload = "";
       var target;
       var sentTargets = [];
+      var requests = [];
 
       for (var i = 0; i < options.targets.length; i++) {
+        var payload = "";
         target = options.targets[i];
         if (target.hide) {continue;}
 
@@ -172,11 +173,11 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
         var esQuery = angular.toJson(queryObj);
         var luceneQuery = target.query || '*';
         luceneQuery = templateSrv.replace(luceneQuery, options.scopedVars, 'lucene');
-        luceneQuery = angular.toJson(luceneQuery);
+//        luceneQuery = angular.toJson(luceneQuery);
 
         // remove inner quotes
-        luceneQuery = luceneQuery.substr(1, luceneQuery.length - 2);
         esQuery = esQuery.replace("$lucene_query", luceneQuery);
+        luceneQuery = luceneQuery.substr(1, luceneQuery.length - 2);
 
         var searchType = queryObj.size === 0 ? 'count' : 'query_then_fetch';
         var header = this.getQueryHeader(searchType, options.range.from, options.range.to);
@@ -187,6 +188,14 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
         } else {
           payload += esQuery + '\n';
         }
+
+        payload = payload.replace(/\$interval/g, options.interval);
+        payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf());
+        payload = payload.replace(/\$timeTo/g, options.range.to.valueOf());
+        payload = payload.replace(/\$BoundsTimeTo/g, options.range.to.millisecond(options.range.to.millisecond()-1).valueOf());
+        payload = templateSrv.replace(payload, options.scopedVars);
+
+        requests.push(payload);
         sentTargets.push(target);
       }
 
@@ -194,14 +203,21 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
         return $q.when([]);
       }
 
-      payload = payload.replace(/\$interval/g, options.interval);
-      payload = payload.replace(/\$timeFrom/g, options.range.from.valueOf());
-      payload = payload.replace(/\$timeTo/g, options.range.to.valueOf());
-      payload = payload.replace(/\$BoundsTimeTo/g, options.range.to.millisecond(options.range.to.millisecond()-1).valueOf());
-      payload = templateSrv.replace(payload, options.scopedVars);
+      function processSeriesList(index, res) {
+        new ElasticResponse(sentTargets, res).getTimeSeries(seriesList, res.responses[0], index);
+      }
 
-      return this._post('_msearch', payload).then(function(res) {
-        return new ElasticResponse(sentTargets, res).getTimeSeries();
+      var seriesList = [];
+      var promises = [];
+
+      for (var index = 0; index < requests.length; index++) {
+        var promise = this._post('_msearch', requests[index]);
+        promises.push(promise);
+        promise.then(processSeriesList.bind(null, index));
+      }
+
+      return Promise.all(promises).then(function() {
+        return {data: seriesList};
       });
     };
 
