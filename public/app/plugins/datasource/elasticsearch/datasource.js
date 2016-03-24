@@ -166,9 +166,9 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
     };
 
     this.query = function(options) {
-      var payload = "";
       var target;
       var sentTargets = [];
+      var requests = [];
 
       for (var i = 0; i < options.targets.length; i++) {
         target = options.targets[i];
@@ -215,8 +215,37 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
       }
 
       function processSeriesList(index, res) {
-        new ElasticResponse(sentTargets, res).getTimeSeries(seriesList, res.responses[0], index);
+        var combinedResponse = mergeResponses(res);
+        new ElasticResponse(sentTargets, combinedResponse).getTimeSeries(seriesList, combinedResponse, 0);
       }
+
+      function mergeResponses(responses){
+        if(responses.length === 1){
+          return responses[0];
+        }
+        var baseResponse = responses[0].responses[0];
+        for(var i = 1; i < responses.length; i++){
+          var currentResponse = responses[i].responses[0];
+          if(baseResponse._shards && currentResponse._shards){
+            baseResponse._shards.failed += currentResponse._shards.failed;
+            baseResponse._shards.successful += currentResponse._shards.successful;
+            baseResponse._shards.total += currentResponse._shards.total;
+          }
+          if(currentResponse.aggregations && baseResponse.aggregations){
+//            for (var j = 0; j < currentResponse.aggregations.length; j++){
+               baseResponse.aggregations[2].buckets = baseResponse.aggregations[2].buckets.concat(currentResponse.aggregations[2].buckets);
+//            }
+          }
+          if(currentResponse.hits && baseResponse.hits){
+            baseResponse.hits.total += currentResponse.hits.total;
+            if (currentResponse.hits.hits.length > 0){
+               baseResponse.hits.hits = baseResponse.hits.hits.concat(currentResponse.hits.hits);
+            }
+          }
+        }
+        return baseResponse;
+      }
+
       var seriesList = [];
       var promises = [];
 
@@ -229,7 +258,9 @@ function (angular, _, moment, kbn, ElasticQueryBuilder, IndexPattern, ElasticRes
           promises.push(promise);
 //          promise.then(processSeriesList.bind(null, index));
         }
-        Promise.all(groupedPromises).then(processSeriesList.bind(null, index));
+        Promise.all(groupedPromises).then(function(res){
+          processSeriesList(index, res);
+        });
       }
 
       return Promise.all(promises).then(function() {

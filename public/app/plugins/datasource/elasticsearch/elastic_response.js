@@ -302,39 +302,33 @@ function (_, queryDef) {
     return result;
   };
 
-  ElasticResponse.prototype.getTimeSeries = function() {
-    var seriesList = [];
-
-    for (var i = 0; i < this.response.responses.length; i++) {
-      var response = this.response.responses[i];
-      if (response.error) {
-        throw this.getErrorFromElasticResponse(this.response, response.error);
-      }
-
-      if (response.hits && response.hits.hits.length > 0) {
-        this.processHits(response.hits, seriesList);
-      }
-
-      if (response.aggregations) {
-        var aggregations = response.aggregations;
-        var target = this.targets[i];
-        var tmpSeriesList = [];
-        var docs = [];
-
-        this.processBuckets(aggregations, target, tmpSeriesList, docs, {}, 0);
-        this.trimDatapoints(tmpSeriesList, target);
-        this.nameSeries(tmpSeriesList, target);
-
-        for (var y = 0; y < tmpSeriesList.length; y++) {
-          seriesList.push(tmpSeriesList[y]);
-        }
-
-        if (seriesList.length === 0 && docs.length > 0) {
-          seriesList.push({target: 'docs', type: 'docs', datapoints: docs});
-        }
-      }
+  ElasticResponse.prototype.getTimeSeries = function(seriesList, response, index) {
+    if (response.error) {
+      throw this.getErrorFromElasticResponse(this.response, response.error);
     }
 
+    if (response.hits && response.hits.hits.length > 0) {
+      this.processHits(response.hits, seriesList);
+    }
+
+    if (response.aggregations) {
+      var aggregations = response.aggregations;
+      var target = this.targets[index];
+      var tmpSeriesList = [];
+      var docs = [];
+
+      this.processBuckets(aggregations, target, tmpSeriesList, docs, {}, 0);
+      this.trimDatapoints(tmpSeriesList, target);
+      this.nameSeries(tmpSeriesList, target);
+
+      for (var y = 0; y < tmpSeriesList.length; y++) {
+        seriesList.push(tmpSeriesList[y]);
+      }
+
+      if (seriesList.length === 0 && docs.length > 0) {
+        seriesList.push({target: 'docs', type: 'docs', datapoints: docs});
+      }
+    }
     return { data: seriesList };
   };
 
